@@ -1,7 +1,7 @@
 [project]
 name = "exam2"
 version = "0.1.0"
-description = "Add your description here"
+description = "MLBD assignments 1 (recommender systems) and 2 (deep learning)"
 readme = "README.md"
 authors = [
     { name = "Ivana Stojanova", email = "558296@student.saxion.nl" }
@@ -9,17 +9,16 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "ipykernel>=7.4.0",
+    "ipywidgets>=8.1.9",
     "matplotlib>=3.11.2",
     "matplotlib-inline>=0.2.2",
+    "nltk>=3.10.4",
     "numpy>=2.5.4",
     "pandas>=3.1.0",
     "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
     "tensorflow>=2.21.0",
 ]
 
-[project.scripts]
-exam2 = "exam2:main"
-
-[build-system]
-requires = ["uv_build>=0.12.7,<0.13.0"]
-build-backend = "uv_build"
+[tool.uv]
+package = false
