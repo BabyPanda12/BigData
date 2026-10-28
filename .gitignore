@@ -10,3 +10,9 @@ wheels/
 .venv
 
 dataset/*.png
+
+# Large / regenerated files
+**/models/
+**/models_cnn/
+*.npz
+.ipynb_checkpoints/
