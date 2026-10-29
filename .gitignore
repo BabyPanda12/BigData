@@ -9,10 +9,13 @@ wheels/
 # Virtual environments
 .venv
 
-data/glagolitic/*.png
+data/letters/*.png
 
 # Large / regenerated files
 **/models/
 **/models_cnn/
 *.npz
 .ipynb_checkpoints/
+
+# submission
+MLDB_*.zip

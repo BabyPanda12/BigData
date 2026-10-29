@@ -1,0 +1,23 @@
+# Experiments
+
+Details, graphs and observations per experiment are in the notebooks, this is a summary.
+
+## Assignment 1: Recommender systems (MovieLens)
+
+**Techniques.** *Content-based* (`content_based.ipynb`): each field gets its own TF-IDF vector (plot: cleaned, stemmed, stop words removed, 1-2-grams; title; writers and genres as lists of tokens), the cosine similarities per field are combined with weights (plot 0.4, title/writer/genre 0.2), and a user profile is the average vector of the watched movies. 
+
+*Collaborative filtering* (`collaborative_filtering.ipynb`): user-user and item-item with cosine, Pearson and adjusted cosine similarity, a similarity-weighted average as prediction, and only movies with at least 30 ratings (the matrix is only 1.6% filled).
+
+**Evaluation and results.** For every user with at least 10 ratings, the most recent liked rating (>= 3.5) is hidden and the similarity matrices are rebuilt without it; a hit means the movie is in the top N. User-user with cosine is best (hit@10 9.1%), clearly above a popularity baseline (5.2%); Pearson 6.1%, adjusted cosine 7.5%. Item-item scores below the baseline (<= 1.5%), because its prediction is an average of the user's own high ratings, so almost every candidate is predicted close to 4. The content-based recommender is only checked by hand.
+
+**Limitations.** One hidden rating per user gives a noisy hit rate, rare hidden movies cannot be hit (30-rating minimum), and the content-based weights were chosen by hand.
+
+## Assignment 2: Deep learning
+
+**Part 1: poker hands** (`neural_network.ipynb`). Duplicates removed, stratified split 70/15/15 *before* balancing; only the training set is balanced (under-/oversampling to 2,000-20,000 per class). Suits and ranks one-hot (85 features), softmax output, categorical cross-entropy, Adam, early stopping on validation loss. **14 networks**: 6 sizes (1x32 to 3x256, ReLU), sigmoid/tanh/ReLU on 1x32 and 2x128, dropout 0.2/0.5 on 2x128 and 3x256. Every network with >= 64 neurons per layer reaches > 99.6% test accuracy; 1x32 underfits (78%). The activation matters for the small network (tanh 89%, ReLU 78%, sigmoid 73%) but not for 2x128 (all ~99.99%). Dropout 0.5 lowers accuracy to 94-95% because there was no overfitting to prevent. **Best: 2x128 tanh**, 100.0% validation/test accuracy, 1.0000 in 5-fold cross-validation (balanced inside each fold). One-hot ranks are essential: with one scaled number per rank the same network gets 69.5%.
+
+**Part 2: Glagolitic letters** (`convolutional_network.ipynb`). 1,286 images, 11 letters; images with the same date/time stamp stay in the same split (`StratifiedGroupKFold`). **10 CNNs** with 2-3 conv layers, Flatten + dense or global average pooling (GAP), with and without dropout, plus extras: **data augmentation** (rotation, shift, zoom) and **batch normalization**. Early stopping first watched the validation loss, but the over-confident Flatten networks had their lowest validation loss in epoch 1 while accuracy still improved, so it was changed to validation accuracy (patience 15, max 150 epochs). The Flatten networks (2-8M weights for ~920 images) overfit within 3 epochs (validation 0.77-0.86); GAP networks (19k-94k weights) overfit much less (best grid network: 3 conv + GAP + dropout 0.5, validation 0.883). Augmentation caused almost all of the improvement (control run with augmentation only: validation 0.861 -> 0.961); batch normalization alone made the networks unstable and worse. **Best: 3 conv layers + dense 128 + augmentation + batch normalization**, 0.978 validation and test accuracy, 0.952 +/- 0.021 in 5-fold group cross-validation; 4 of 182 test images wrong. The notebook also shows the confusion matrix, the filters and the feature maps.
+
+**Evaluation (both parts).** Training curves (accuracy and cross-entropy, train vs validation) for every network; models are chosen on the validation set and the test set is only used to report; cross-validation of the best network; per-class recall (plus precision/F1 in Part 1, a confusion matrix in Part 2). Both exported models are reloaded and evaluated on data read from file.
+
+**Limitations and improvements.** Part 1: the test set has only 2 straight flushes and 1 royal flush (the best network misses both straight flushes), oversampling only repeats 6-12 unique hands, and most runs hit the 40-epoch limit. Part 2: validation and test have ~180 images (1 image = 0.55%) and each network was trained once, so small differences are noise. Improvements: more data or more seeds, a larger zoom range in the augmentation, a learning-rate schedule, transfer learning.
